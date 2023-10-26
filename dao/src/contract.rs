@@ -1,25 +1,12 @@
 use crate::proposal::{
-    add_abstain_votes,
-    add_against_votes,
-    add_for_votes,
-    add_proposal,
-    check_min_duration,
-    check_min_vote_power,
-    check_voted,
-    executed,
-    for_votes_win,
-    get_proposal,
-    get_voted,
-    // min_quorum_met,
-    set_executed,
-    set_min_vote_power,
-    set_voted,
-    votes_counts,
-    Proposal,
-    VotesCount,
+    add_abstain_votes, add_against_votes, add_for_votes, add_proposal, check_min_duration,
+    check_min_vote_power, check_voted, executed, for_votes_win, get_proposal, get_voted,
+    min_quorum_met, set_executed, set_min_vote_power, set_voted, votes_counts, Proposal,
+    ProposalInstr, VotesCount,
 };
 use crate::storage::core::CoreState;
 
+use crate::storage::proposal_storage::ProposalStorageKey;
 use crate::utils::core::{can_init_contract, get_core_state, set_core_state};
 
 use soroban_sdk::{
@@ -27,8 +14,8 @@ use soroban_sdk::{
     IntoVal, Map, String, Symbol, Val, Vec,
 };
 
-use crate::errors::ExecutionError;
 use crate::errors::VoteError;
+use crate::errors::{ContractError, ExecutionError};
 
 pub trait DaoContractTrait {
     fn init(
@@ -42,7 +29,15 @@ pub trait DaoContractTrait {
         shareholders: Map<Address, i128>,
     ) -> Address;
     fn create_proposal(env: Env, from: Address, proposal: Proposal) -> u32;
-    fn vote(env: Env, from: Address, prop_id: u32, power: u32, vote: u32);
+    fn vote(
+        env: Env,
+        from: Address,
+        prop_id: u32,
+        power: u32,
+        vote: u32,
+        tokens: i128,
+        t_contract: Address,
+    );
     fn get_votes(env: Env, prop_id: u32) -> VotesCount;
     fn have_voted(env: Env, prop_id: u32, vote: Address) -> bool;
     fn execute(env: Env, prop_id: u32) -> Vec<Val>;
@@ -121,7 +116,15 @@ impl DaoContractTrait for DaoContract {
         add_proposal(&env, proposal)
     }
 
-    fn vote(env: Env, from: Address, prop_id: u32, power: u32, vote: u32) {
+    fn vote(
+        env: Env,
+        from: Address,
+        prop_id: u32,
+        power: u32,
+        vote: u32,
+        tokens: i128,
+        t_contract: Address,
+    ) {
         // 1. Check if DAO member
         let core_state = get_core_state(&env);
         if !core_state.shareholders.contains(from.clone()) {
@@ -138,15 +141,25 @@ impl DaoContractTrait for DaoContract {
         let proposal = get_proposal(&env, prop_id);
         check_min_duration(&env, &proposal);
 
-        // 5. Vote
+        // 5. Check amount of tokens
+        let balance_fn: Symbol = symbol_short!("balance");
+        let shareholder_address_raw: Val = from.to_val();
+        let balance_args: Vec<Val> = vec![&env, shareholder_address_raw] as Vec<Val>;
+        let balance_res: i128 = env.invoke_contract(&t_contract, &balance_fn, balance_args);
+
+        if balance_res < tokens {
+            panic_with_error!(env, VoteError::TokenAmountSurpassed)
+        }
+
+        // 6. Vote
         if vote == 0 {
-            add_against_votes(&env, prop_id, 1);
+            add_against_votes(&env, prop_id, tokens);
             set_voted(&env, prop_id, from);
         } else if vote == 1 {
-            add_for_votes(&env, prop_id, 1);
+            add_for_votes(&env, prop_id, tokens);
             set_voted(&env, prop_id, from);
         } else if vote == 2 {
-            add_abstain_votes(&env, prop_id, 1);
+            add_abstain_votes(&env, prop_id, tokens);
             set_voted(&env, prop_id, from);
         } else {
             panic_with_error!(env, VoteError::WrongVoteParam)
@@ -159,7 +172,7 @@ impl DaoContractTrait for DaoContract {
         check_min_duration(&env, &proposal);
 
         // 2. Check if min quorum is met
-        // min_quorum_met(&env, prop_id);
+        min_quorum_met(&env, prop_id);
 
         // 3. Check if "for" votes beat "against" votes
         for_votes_win(&env, prop_id);
@@ -169,10 +182,11 @@ impl DaoContractTrait for DaoContract {
 
         // 5. Execute
         let mut exec_results: Vec<Val> = Vec::new(&env);
-        // for instruct in proposal.instr {
-        //     let res: Val = env.invoke_contract(&instruct.c_id, &instruct.fun_name, instruct.args);
-        //     exec_results.push_front(res);
-        // }
+
+        for (instruct) in proposal.instr.iter() {
+            let res: Val = env.invoke_contract(&instruct.c_id, &instruct.fun_name, instruct.args);
+            exec_results.push_front(res);
+        }
 
         // 6. Set executed to true
         set_executed(&env, prop_id);

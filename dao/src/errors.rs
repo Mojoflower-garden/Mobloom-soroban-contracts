@@ -31,6 +31,7 @@ pub enum VoteError {
     NotAMember = 0,
     ProposalExpired = 1,
     WrongVoteParam = 2,
+    TokenAmountSurpassed = 3,
 }
 
 #[contracterror]
@@ -38,4 +39,5 @@ pub enum VoteError {
 pub enum ExecutionError {
     MinParticipNotMet = 0,
     ForProposalFail = 1,
+    MinQuoNotMet = 2,
 }

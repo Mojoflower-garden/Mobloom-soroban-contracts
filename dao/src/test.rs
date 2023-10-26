@@ -1,4 +1,5 @@
 #![cfg(test)]
+#![cfg(test_prop_execution)]
 
 use crate::{contract::DaoContract, DaoContractClient};
 use soroban_sdk::{testutils::Address as _, Address, BytesN, Env, IntoVal, Map, String, Vec};
@@ -41,4 +42,12 @@ fn test() {
     );
 
     // assert_eq!(val)
+}
+
+#[test_prop_execution]
+fn test_prop_execution() {
+    let env = Env::default();
+    let client = DaoContractClient::new(&env, &env.register_contract(None, DaoContract));
+
+    client.execute(&1);
 }
