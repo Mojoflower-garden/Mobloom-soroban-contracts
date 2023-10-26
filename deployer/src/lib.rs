@@ -33,7 +33,7 @@ mod test;
 // deployer-wasm-hash -> 95900fed357813b41cc8b7f39aabaae2c4a52de29b3f32d6da471a2def55f5b7
 
 // soroban contract install --wasm ../dao/target/wasm32-unknown-unknown/release/governance.wasm
-// dao-wasm-hash -> 3c442fad6f64df366c7ed85de3b1bd8aec50d82c951261b7806afe8e3e968f21
+// dao-wasm-hash -> 3b8b33b24ed6cf32fde3c5291632f1b4545228c13706cbb14abfea77b50fc9f7
 
 // soroban contract install --wasm ../token/target/wasm32-unknown-unknown/release/soroban_token_contract.wasm
 // token-wasm-hash -> cf2318b87338b80ce75d0276244f9be3a131d74656a7fecd1d92da0eb8ab09e3
@@ -44,11 +44,11 @@ mod test;
 //     --network futurenet
 // deployer_contract_id -> CBQHB5XVIJH5XYRHN5VCZZTWDZC2ORILRMKYIZASOE6J73BQ24DPEDYF
 
-// soroban --vv contract deploy \
-//     --wasm target/wasm32-unknown-unknown/release/governance.wasm \
-//     --source juico \
-//     --network futurenet
-// dao_contract_id -> CAOKWGL7DHRZ7KY7NK4UIK55VPIAUYCPPYJWMQBHO4RMP6F3W3RBWNMC
+soroban --vv contract deploy \
+    --wasm target/wasm32-unknown-unknown/release/governance.wasm \
+    --source juico \
+    --network futurenet
+// dao_contract_id -> CARW6CGBX3TFV3VMEFPNRC5VNHWQOXZARWBHYK4PEBREXS2QEAWN6BKX
 
 // soroban --vv contract deploy \
 //     --wasm target/wasm32-unknown-unknown/release/soroban_token_contract.wasm \

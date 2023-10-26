@@ -1,8 +1,8 @@
 use crate::proposal::{
     add_abstain_votes, add_against_votes, add_for_votes, add_proposal, check_min_duration,
     check_min_vote_power, check_voted, executed, for_votes_win, get_proposal, get_voted,
-    min_quorum_met, set_executed, set_min_vote_power, set_voted, votes_counts, Proposal,
-    ProposalInstr, VotesCount,
+    is_passed_deadline, min_quorum_met, set_executed, set_min_vote_power, set_voted, votes_counts,
+    Proposal, ProposalInstr, VotesCount,
 };
 use crate::storage::core::CoreState;
 
@@ -40,7 +40,8 @@ pub trait DaoContractTrait {
     );
     fn get_votes(env: Env, prop_id: u32) -> VotesCount;
     fn have_voted(env: Env, prop_id: u32, vote: Address) -> bool;
-    fn execute(env: Env, prop_id: u32) -> Vec<Val>;
+    // fn execute(env: Env, prop_id: u32) -> Vec<Val>;
+    fn execute(env: Env, prop_id: u32) -> bool;
 }
 
 #[contract]
@@ -139,7 +140,9 @@ impl DaoContractTrait for DaoContract {
 
         // 4. Check deadline
         let proposal = get_proposal(&env, prop_id);
-        check_min_duration(&env, &proposal);
+        if is_passed_deadline(&env, &proposal) {
+            panic_with_error!(env, ContractError::MinDurationNotSatisfied)
+        }
 
         // 5. Check amount of tokens
         let balance_fn: Symbol = symbol_short!("balance");
@@ -166,10 +169,13 @@ impl DaoContractTrait for DaoContract {
         }
     }
 
-    fn execute(env: Env, prop_id: u32) -> Vec<Val> {
+    // fn execute(env: Env, prop_id: u32) -> Vec<Val> {
+    fn execute(env: Env, prop_id: u32) -> bool {
         let proposal = get_proposal(&env, prop_id);
         // 1. Check deadline
-        check_min_duration(&env, &proposal);
+        if !is_passed_deadline(&env, &proposal) {
+            panic_with_error!(env, ContractError::TooEarlyToExecute)
+        }
 
         // 2. Check if min quorum is met
         min_quorum_met(&env, prop_id);
@@ -178,8 +184,9 @@ impl DaoContractTrait for DaoContract {
         for_votes_win(&env, prop_id);
 
         // 4. Check if executed
-        executed(&env, prop_id);
-
+        if executed(&env, prop_id) {
+            panic_with_error!(env, ContractError::AllreadyExecuted)
+        }
         // 5. Execute
         let mut exec_results: Vec<Val> = Vec::new(&env);
 
@@ -190,9 +197,10 @@ impl DaoContractTrait for DaoContract {
 
         // 6. Set executed to true
         set_executed(&env, prop_id);
+        true
 
-        // 7. Return results
-        exec_results
+        // // 7. Return results
+        // exec_results
     }
 
     fn get_votes(env: Env, prop_id: u32) -> VotesCount {

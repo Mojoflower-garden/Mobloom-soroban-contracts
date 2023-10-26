@@ -86,6 +86,10 @@ pub fn check_min_duration(env: &Env, proposal: &Proposal) {
     }
 }
 
+pub fn is_passed_deadline(env: &Env, proposal: &Proposal) -> bool {
+    proposal.end_time < env.ledger().timestamp()
+}
+
 pub fn set_voted(env: &Env, prop_id: u32, voter: Address) {
     env.storage().persistent().set(
         &ProposalStorageKey::Voted(ProposalVoted { voter, prop_id }),
@@ -259,8 +263,8 @@ pub fn min_quorum_met(env: &Env, prop_id: u32) {
 
 pub fn for_votes_win(env: &Env, prop_id: u32) {
     let for_votes = get_for_votes(&env, prop_id);
-    let agains_votes = get_against_votes(&env, prop_id);
-    if for_votes >= agains_votes {
+    let against_votes = get_against_votes(&env, prop_id);
+    if for_votes <= against_votes {
         panic_with_error!(env, ExecutionError::ForProposalFail)
     }
 }
