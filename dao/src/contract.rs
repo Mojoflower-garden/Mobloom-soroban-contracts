@@ -1,8 +1,8 @@
 use crate::proposal::{
-    add_abstain_votes, add_against_votes, add_for_votes, add_proposal, check_min_duration,
-    check_min_vote_power, check_voted, executed, for_votes_win, get_proposal, get_voted,
-    is_passed_deadline, min_quorum_met, set_executed, set_min_vote_power, set_voted, votes_counts,
-    Proposal, ProposalInstr, VotesCount,
+    add_abstain_votes, add_against_votes, add_for_votes, add_proposal, check_min_vote_power,
+    check_voted, executed, for_votes_win, get_proposal, get_voted, is_passed_deadline,
+    min_quorum_met, set_executed, set_min_vote_power, set_voted, votes_counts, Proposal,
+    ProposalInstr, VotesCount,
 };
 use crate::storage::core::CoreState;
 use crate::storage::core::{
@@ -10,7 +10,6 @@ use crate::storage::core::{
 };
 use crate::storage::proposal_storage::ProposalStorageKey;
 
-use crate::storage::proposal_storage::ProposalStorageKey;
 use crate::utils::core::{can_init_contract, get_core_state, set_core_state};
 
 use soroban_sdk::{
@@ -130,6 +129,7 @@ impl DaoContractTrait for DaoContract {
         tokens: i128,
         t_contract: Address,
     ) {
+        let key = ProposalStorageKey::Proposal(prop_id);
         // 1. Check if DAO member
         let core_state = get_core_state(&env);
         if !core_state.shareholders.contains(from.clone()) {
