@@ -29,55 +29,43 @@ impl Deployer {
 
 mod test;
 
-// soroban contract install --wasm ./target/wasm32-unknown-unknown/release/soroban_deployer_contract.wasm
-// deployer-wasm-hash -> 95900fed357813b41cc8b7f39aabaae2c4a52de29b3f32d6da471a2def55f5b7
-
 // soroban contract install --wasm ../dao/target/wasm32-unknown-unknown/release/governance.wasm
-// dao-wasm-hash -> 3b8b33b24ed6cf32fde3c5291632f1b4545228c13706cbb14abfea77b50fc9f7
+// dao-wasm-hash -> 7fae616fe6ce00b6f79434dcd80ace4d881fb0295af7909c5617dd215544cbad
 
 // soroban contract install --wasm ../token/target/wasm32-unknown-unknown/release/soroban_token_contract.wasm
-// token-wasm-hash -> cf2318b87338b80ce75d0276244f9be3a131d74656a7fecd1d92da0eb8ab09e3
+// token-wasm-hash -> c336d084f055b55562320041b7daa3ac8cc18c6be6b9ec34726ceee98dd030c7
 
 // soroban --vv contract deploy \
 //     --wasm target/wasm32-unknown-unknown/release/soroban_deployer_contract.wasm \
 //     --source juico \
 //     --network futurenet
-// deployer_contract_id -> CBQHB5XVIJH5XYRHN5VCZZTWDZC2ORILRMKYIZASOE6J73BQ24DPEDYF
+// deployer_contract_id -> CAC3OGDAHENQA22XLNDBMJ7KAWEKJWLKJVJWK3NMWGYGM6PFYDAVK5CE
 
-soroban --vv contract deploy \
-    --wasm target/wasm32-unknown-unknown/release/governance.wasm \
-    --source juico \
-    --network futurenet
-// dao_contract_id -> CARW6CGBX3TFV3VMEFPNRC5VNHWQOXZARWBHYK4PEBREXS2QEAWN6BKX
+// soroban contract deploy \
+//     --wasm target/wasm32-unknown-unknown/release/governance.wasm \
+//     --source juico \
+//     --network futurenet
+// dao_contract_id -> CCZXRZQWMLRNLASAR5LOQJPIUGCVTKCRWY6FJ27TPUVBGJPN4CPYWJOM
 
-// soroban --vv contract deploy \
+// soroban contract deploy \
 //     --wasm target/wasm32-unknown-unknown/release/soroban_token_contract.wasm \
 //     --source juico \
 //     --network futurenet
-// token_contract_id -> CDXW3LGCXU57ZJ3XSF4VAGBTDJAQG5X5AG6NE5YEFDGMQQHN5Y3E7HC3
-
-// ------------------------------------ FOR PROPOSAL EXECUTION ------------------------------------
-
-// soroban --vv contract deploy \
-//     --wasm target/wasm32-unknown-unknown/release/demo_instruct_exec.wasm \
-//     --source juico \
-//     --network futurenet
-// token_contract_id -> CB3HRDYSR3VIHLB3CZCN4GCMR6BDFALK43VR2LH5YLWTRKX7V3NH3DXU
+// token_contract_id -> CAGEDGPP4EQM5AOJIJ6PFHMT2FABFOIEK4EFIRAPRS2WLB3QKJYAX7L3
 
 // ------------------------------------ FOR RESTORATION ------------------------------------
 
 // soroban --vv contract restore \
-//     --id CCQNGCPYYJXIGOY4KEWVN6QGKN7N2EFJIRNKUJDVEPTT5ANKITGXBNE3 \
+//     --id CA6B25QPWAHTMPC5NZO36PEOPMG7ENSITE24CYWC4WVAIL2UCXOSLILH \
 //     --source juico \
-//     --network futurenet \
-//     --key-xdr AAAAFA==
+//     --network futurenet
 
 // soroban --vv contract invoke \
-//     --id CCHONWYCG5HWW4R6WT3M26TUE7TDOT6CTJKWDUS74VWSQW27345G42NN \
+//     --id CAGGNI3F7IORBOFKEHOPVD2RLCSRTAQADUF6CVARTT2JHAZOYE2ARBKA \
 //     --source juico \
-//     --network futurenet -- -h \
+//     --network futurenet -- -h
 
 // soroban --vv contract restore \
-//     --wasm-hash cf2318b87338b80ce75d0276244f9be3a131d74656a7fecd1d92da0eb8ab09e3 \
+//     --wasm-hash 0c66a365fa1d10b8aa21dcfa8f5158a51982001d0be154119cf493832ec13408 \
 //     --source juico \
 //     --network futurenet
